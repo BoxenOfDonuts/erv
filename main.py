@@ -43,6 +43,13 @@ def leds():
     #setup relay pin
     G.setup(4, G.OUT, initial=0)
 
+    # setup led pin
+    #G.setup(18,G.OUT)
+
+    # turn on LED
+    #G.output(18,G.HIGH)
+    #logger.info("Turning on LED", extra={'PIN_18': G.input(18)})
+
     # setup low to flip to NO
     G.output(4, G.HIGH)
     logger.info("Relay switched to NO", extra={'PIN_4': G.input(4)})
@@ -53,6 +60,10 @@ def leds():
     # close relay
     G.output(4, G.LOW)
     logger.info("Switched off Relay")
+
+    #time.sleep(2)
+    #G.output(4, G.LOW)
+    #logger.info("Switched off LED")
 
     # be a good scout and cleanup after yourself
     G.cleanup()
