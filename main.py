@@ -16,10 +16,11 @@ def check_state():
 
 
 @app.route('/fan/start')
-def start_fan():
+def fan():
     req_data = request.get_json()
     timer = req_data['time']
-    executor.submit(erv.relay(timer))
+    executor.submit(start_fan, timer)
+    return jsonify({'state': 'fan started'})
 
 # submitting data not query string
 @app.route('/form', methods=['POST', 'GET'])
@@ -39,6 +40,10 @@ def run_jobs():
 def run_custom(duration):
     executor.submit(custom_task, duration)
     return jsonify({'duration': duration})
+
+
+def start_fan(timer):
+    erv.relay(timer)
 
 
 def custom_task(timer):
