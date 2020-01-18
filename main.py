@@ -19,7 +19,7 @@ def check_state():
 def start_fan():
     req_data = request.get_json()
     timer = req_data['time']
-    executor.submit(erv.relay(), timer)
+    executor.submit(erv.relay(timer))
 
 # submitting data not query string
 @app.route('/form', methods=['POST', 'GET'])
@@ -50,4 +50,4 @@ def custom_task(timer):
 if __name__ == '__main__':
     # cleanup pins
     erv.pincleanup()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

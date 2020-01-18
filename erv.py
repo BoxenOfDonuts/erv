@@ -63,7 +63,7 @@ def relay(timer):
     G.output(4, G.HIGH)
     logger.info("Relay switched to NO", extra={'PIN_4': G.input(4)})
 
-    logger.info("Relay opened for {}} minutes".format(sleep_time))
+    logger.info("Relay opened for {} minutes".format(sleep_time))
     time.sleep(sleep_time)
 
     # close relay
