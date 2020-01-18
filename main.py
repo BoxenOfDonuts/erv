@@ -1,79 +1,53 @@
-import socket
-import time
-import logging
-from pythonjsonlogger import jsonlogger
-import RPi.GPIO as G
-import sys
+from flask import Flask, jsonify, request
+from time import sleep
+import erv
+from concurrent.futures import ThreadPoolExecutor
 
-# Setup Logging
-logHandler = logging.FileHandler(filename="/var/log/erv/erv.log")
-formatter = jsonlogger.JsonFormatter('%(asctime)s %(message)s')
-logHandler.setFormatter(formatter)
-logging.getLogger().addHandler(logHandler)
-logging.getLogger().setLevel(logging.INFO)
-logger = logging.getLogger()
+# DOCS https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+executor = ThreadPoolExecutor(1)
 
-def listen():
-    logger.info("Starting Bind")
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(("0.0.0.0", 1443))
-    serversocket.listen(5)
-
-    while True:
-        # waiting for connection
-        logger.info("Waiting for connection")
-        connection, addr = serversocket.accept()
-        address = addr[0]
-        logger.info("Connection from address {}".format(address))
-        connection.close()
-        leds()
+app = Flask(__name__)
 
 
-def pincleanup():
-    G.setmode(G.BCM)
-    G.setup(4, G.OUT, initial=0)
-    G.cleanup()
-    logger.info('cleanup ran')
+@app.route('/state')
+def check_state():
+    state = erv.checkpinstatus()
+    return jsonify({'pin state': state})
 
 
-def leds():
-    #set mode
-    G.setmode(G.BCM)
+@app.route('/fan/start')
+def start_fan():
+    req_data = request.get_json()
+    timer = req_data['time']
+    executor.submit(erv.relay(), timer)
 
-    #setup relay pin
-    G.setup(4, G.OUT, initial=0)
-
-    # setup led pin
-    #G.setup(18,G.OUT)
-
-    # turn on LED
-    #G.output(18,G.HIGH)
-    #logger.info("Turning on LED", extra={'PIN_18': G.input(18)})
-
-    # setup low to flip to NO
-    G.output(4, G.HIGH)
-    logger.info("Relay switched to NO", extra={'PIN_4': G.input(4)})
-
-    logger.info("Relay opened for 20 minutes")
-    time.sleep(1200)
-
-    # close relay
-    G.output(4, G.LOW)
-    logger.info("Switched off Relay")
-
-    #time.sleep(2)
-    #G.output(4, G.LOW)
-    #logger.info("Switched off LED")
-
-    # be a good scout and cleanup after yourself
-    G.cleanup()
+# submitting data not query string
+@app.route('/form', methods=['POST', 'GET'])
+def form():
+    req_data = request.get_json()
+    timer = req_data['time']
+    executor.submit(custom_task, timer)
+    return jsonify({'duration': timer})
 
 
-if __name__=="__main__":
-    try:
-        pincleanup()
-        listen()
-    except KeyboardInterrupt:
-        G.cleanup()
-        logger.info('Keyboard interrupt, exiting')
-        sys.exit()
+@app.route('/jobs')
+def run_jobs():
+    return jsonify({'key': 'value'})
+
+
+@app.route('/custom/<int:duration>')
+def run_custom(duration):
+    executor.submit(custom_task, duration)
+    return jsonify({'duration': duration})
+
+
+def custom_task(timer):
+    print('sleeping for {} seconds'.format(timer))
+    sleep(int(timer))
+    print('done!')
+
+
+if __name__ == '__main__':
+    # cleanup pins
+    erv.pincleanup()
+    app.run(debug=True)
