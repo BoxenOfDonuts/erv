@@ -22,6 +22,7 @@ def fan():
     executor.submit(start_fan, timer)
     return jsonify({'state': 'fan started'})
 
+
 # submitting data not query string
 @app.route('/form', methods=['POST', 'GET'])
 def form():
@@ -43,7 +44,12 @@ def run_custom(duration):
 
 
 def start_fan(timer):
-    erv.relay(timer)
+    if not erv.checkpinstatus():
+        erv.relay(timer)
+    else:
+        return jsonify({
+            'state': 'already running'
+        })
 
 
 def custom_task(timer):
