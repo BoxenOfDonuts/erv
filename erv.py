@@ -43,7 +43,7 @@ class _Timer(Thread):
     def run(self):
         self.finished.wait(self.interval)
         if self.additional_interval:
-            print('added time!')
+            logger.info('added {} minutes to running fan'.format(self.additional_interval))
             self.finished.wait(self.additional_interval)
             self.additional_interval = None
         if not self.finished.is_set():
@@ -89,7 +89,6 @@ def pincleanup():
 
 
 def relay_open(timer):
-    sleep_time = timer * 60
     #set mode
     G.setmode(G.BCM)
 
@@ -100,7 +99,7 @@ def relay_open(timer):
     G.output(4, G.HIGH)
     logger.info("Relay switched to NO", extra={'PIN_4': G.input(4)})
 
-    logger.info("Relay opened for {} seconds".format(sleep_time))
+    logger.info("Relay opened for {} seconds".format(timer))
 
 
 def relay_close():
@@ -117,12 +116,12 @@ def relay_close():
 def relay(timer):
     global t
     relay_open(timer)
-    t = Timer((timer*60), relay_close)
+    t = Timer((timer), relay_close)
     t.start()
 
 
 def add_time(timer):
-    t.add(timer*60)
+    t.add(timer)
 
 
 if __name__=="__main__":

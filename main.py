@@ -21,7 +21,7 @@ def check_state():
     return jsonify({'pin state': state})
 
 
-@app.route('/fan/start')
+@app.route('/fan/start', methods=['POST'])
 def fan():
     req_data = request.get_json()
     timer = req_data['time']
@@ -33,7 +33,7 @@ def fan():
         return jsonify({'state': 'already running'})
 
 
-@app.route('/fan/add')
+@app.route('/fan/add', methods=['POST'])
 def fan_add():
     req_data = request.get_json()
     timer = req_data['time']
@@ -67,7 +67,7 @@ def run_custom(duration):
 
 
 def add_time_to_fan(timer):
-    print('adding time')
+    timer *= 60
     erv.add_time(timer)
 
 
@@ -76,6 +76,7 @@ def start_fan(timer):
     # erv.relay(timer)
     # if its running already don't let it run again
     # if you want it to queue up additional, change executor to 1
+    timer *= 60
     erv.relay(timer)
     print('stopping fan function')
 
@@ -87,6 +88,5 @@ def custom_task(timer):
 
 
 if __name__ == '__main__':
-    # cleanup pins
     erv.pincleanup()
     app.run(debug=True, host='0.0.0.0')
