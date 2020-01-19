@@ -122,7 +122,7 @@ def relay(timer):
 
 
 def add_time(timer):
-    t.add(timer)
+    t.add(timer*60)
 
 
 if __name__=="__main__":
