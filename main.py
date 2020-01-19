@@ -38,7 +38,7 @@ def fan_add():
     req_data = request.get_json()
     timer = req_data['time']
 
-    executor.submit(start_fan, timer)
+    executor.submit(add_time_to_fan(), timer)
     return jsonify({'state': 'time added', 'time': timer})
 
 
@@ -60,6 +60,11 @@ def run_jobs():
 def run_custom(duration):
     executor.submit(custom_task, duration)
     return jsonify({'duration': duration})
+
+
+def add_time_to_fan(timer):
+    print('adding time')
+    erv.add_time(timer)
 
 
 def start_fan(timer):

@@ -117,7 +117,7 @@ def relay_close():
 def relay(timer):
     global t
     relay_open(timer)
-    t = Timer((timer*60), relay_close())
+    t = Timer((timer*60), relay_close)
     t.start()
 
 
