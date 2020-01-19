@@ -38,9 +38,8 @@ def fan_add():
     req_data = request.get_json()
     timer = req_data['time']
 
-    if erv.checkpinstatus() == 1:
-        executor.submit(start_fan, timer)
-        return jsonify({'state': 'time added', 'time': timer})
+    executor.submit(start_fan, timer)
+    return jsonify({'state': 'time added', 'time': timer})
 
 
 # submitting data not query string
