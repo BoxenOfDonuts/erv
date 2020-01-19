@@ -3,12 +3,14 @@ from time import sleep
 import erv
 from concurrent.futures import ThreadPoolExecutor
 
-#so with more than one thread it will run the "start" multiple times, but
-#if there is only one it will queue up behind the first so if you ask for 10
-#minutes twice it will go for 20, no matter when you ask for the second 20
+'''
+so with more than one thread it will run the "start" multiple times, but
+if there is only one it will queue up behind the first so if you ask for 10
+minutes twice it will go for 20, no matter when you ask for the second 20
+'''
 
 # DOCS https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
-executor = ThreadPoolExecutor(2)
+executor = ThreadPoolExecutor(1)
 
 app = Flask(__name__)
 
@@ -23,8 +25,22 @@ def check_state():
 def fan():
     req_data = request.get_json()
     timer = req_data['time']
-    executor.submit(start_fan, timer)
-    return jsonify({'state': 'fan started', 'time': timer})
+
+    if erv.checkpinstatus() == 0:
+        executor.submit(start_fan, timer)
+        return jsonify({'state': 'fan started', 'time': timer})
+    else:
+        return jsonify({'state': 'already running'})
+
+
+@app.route('/fan/add')
+def fan_add():
+    req_data = request.get_json()
+    timer = req_data['time']
+
+    if erv.checkpinstatus() == 1:
+        executor.submit(start_fan, timer)
+        return jsonify({'state': 'time added', 'time': timer})
 
 
 # submitting data not query string
@@ -52,11 +68,7 @@ def start_fan(timer):
     # erv.relay(timer)
     # if its running already don't let it run again
     # if you want it to queue up additional, change executor to 1
-    if erv.checkpinstatus() == 0:
-        erv.relay(timer)
-    else:
-        #return jsonify({'state': 'already running'})
-        print('fan already running')
+    erv.relay(timer)
     print('stopping fan function')
 
 
