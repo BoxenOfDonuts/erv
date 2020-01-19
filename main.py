@@ -25,6 +25,7 @@ def check_state():
 def fan():
     req_data = request.get_json()
     timer = req_data['time']
+    timer = int(timer)
 
     if erv.checkpinstatus() == 0:
         executor.submit(start_fan, timer)
@@ -37,6 +38,7 @@ def fan():
 def fan_add():
     req_data = request.get_json()
     timer = req_data['time']
+    timer = int(timer)
 
     #check state, won't add time if its not running
     if erv.checkpinstatus() == 0:
