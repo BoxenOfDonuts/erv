@@ -48,7 +48,7 @@ def fan_add():
         return jsonify({'state': 'time added', 'time': timer})
 
 
-@app.route('/fan/stop')
+@app.route('/fan/stop', methods=['POST'])
 def fan_stop():
     executor.submit(stop_fan)
     state = erv.checkpinstatus()
