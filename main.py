@@ -48,6 +48,13 @@ def fan_add():
         return jsonify({'state': 'time added', 'time': timer})
 
 
+@app.route('/fan/stop')
+def fan_stop():
+    executor.submit(stop_fan)
+    state = erv.checkpinstatus()
+    return jsonify({'state': state})
+
+
 # submitting data not query string
 @app.route('/form', methods=['POST', 'GET'])
 def form():
@@ -81,6 +88,10 @@ def start_fan(timer):
     timer *= 60
     erv.relay(timer)
     print('stopping fan function')
+
+
+def stop_fan():
+    erv.relay_close()
 
 
 def custom_task(timer):
