@@ -103,8 +103,10 @@ def relay_open(timer):
 
 
 def relay_close():
+    logger.info("Close function starting")
     G.setmode(G.BCM)
-
+    # is that what is needed?
+    G.setup(4, G.OUT)
     # close relay
     G.output(4, G.LOW)
     logger.info("Switched off Relay")
