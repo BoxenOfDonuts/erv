@@ -123,6 +123,7 @@ def relay(timer):
 
 
 def add_time(timer):
+    logger.info("Added {} seconds".format(timer))
     t.add(timer)
 
 
