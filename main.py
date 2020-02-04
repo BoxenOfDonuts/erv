@@ -55,6 +55,10 @@ def fan_stop():
     return jsonify({'state': state})
 
 
+@app.route('/health')
+def health_state():
+    return jsonify({'health': 'up'})
+"""
 # submitting data not query string
 @app.route('/form', methods=['POST', 'GET'])
 def form():
@@ -75,6 +79,12 @@ def run_custom(duration):
     return jsonify({'duration': duration})
 
 
+def custom_task(timer):
+    print('sleeping for {} seconds'.format(timer))
+    sleep(int(timer))
+    print('done!')
+"""
+
 def add_time_to_fan(timer):
     timer *= 60
     erv.add_time(timer)
@@ -92,12 +102,6 @@ def start_fan(timer):
 
 def stop_fan():
     erv.relay_close()
-
-
-def custom_task(timer):
-    print('sleeping for {} seconds'.format(timer))
-    sleep(int(timer))
-    print('done!')
 
 
 if __name__ == '__main__':
