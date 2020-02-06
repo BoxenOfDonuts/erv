@@ -1,79 +1,109 @@
-import socket
-import time
-import logging
-from pythonjsonlogger import jsonlogger
-import RPi.GPIO as G
-import sys
+from flask import Flask, jsonify, request
+from time import sleep
+import erv
+from concurrent.futures import ThreadPoolExecutor
 
-# Setup Logging
-logHandler = logging.FileHandler(filename="/var/log/erv/erv.log")
-formatter = jsonlogger.JsonFormatter('%(asctime)s %(message)s')
-logHandler.setFormatter(formatter)
-logging.getLogger().addHandler(logHandler)
-logging.getLogger().setLevel(logging.INFO)
-logger = logging.getLogger()
+'''
+so with more than one thread it will run the "start" multiple times, but
+if there is only one it will queue up behind the first so if you ask for 10
+minutes twice it will go for 20, no matter when you ask for the second 20
+'''
 
-def listen():
-    logger.info("Starting Bind")
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(("0.0.0.0", 1443))
-    serversocket.listen(5)
+# DOCS https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+executor = ThreadPoolExecutor(1)
 
-    while True:
-        # waiting for connection
-        logger.info("Waiting for connection")
-        connection, addr = serversocket.accept()
-        address = addr[0]
-        logger.info("Connection from address {}".format(address))
-        connection.close()
-        leds()
+app = Flask(__name__)
 
 
-def pincleanup():
-    G.setmode(G.BCM)
-    G.setup(4, G.OUT, initial=0)
-    G.cleanup()
-    logger.info('cleanup ran')
+@app.route('/state')
+def check_state():
+    state = erv.checkpinstatus()
+    return jsonify({'pin state': state})
 
 
-def leds():
-    #set mode
-    G.setmode(G.BCM)
+@app.route('/fan/start', methods=['POST'])
+def fan():
+    req_data = request.get_json()
+    timer = req_data['time']
+    timer = int(timer)
 
-    #setup relay pin
-    G.setup(4, G.OUT, initial=0)
-
-    # setup led pin
-    #G.setup(18,G.OUT)
-
-    # turn on LED
-    #G.output(18,G.HIGH)
-    #logger.info("Turning on LED", extra={'PIN_18': G.input(18)})
-
-    # setup low to flip to NO
-    G.output(4, G.HIGH)
-    logger.info("Relay switched to NO", extra={'PIN_4': G.input(4)})
-
-    logger.info("Relay opened for 20 minutes")
-    time.sleep(1200)
-
-    # close relay
-    G.output(4, G.LOW)
-    logger.info("Switched off Relay")
-
-    #time.sleep(2)
-    #G.output(4, G.LOW)
-    #logger.info("Switched off LED")
-
-    # be a good scout and cleanup after yourself
-    G.cleanup()
+    if erv.checkpinstatus() == 0:
+        executor.submit(start_fan, timer)
+        return jsonify({'state': 'fan started', 'time': timer})
+    else:
+        return jsonify({'state': 'already running'})
 
 
-if __name__=="__main__":
-    try:
-        pincleanup()
-        listen()
-    except KeyboardInterrupt:
-        G.cleanup()
-        logger.info('Keyboard interrupt, exiting')
-        sys.exit()
+@app.route('/fan/add', methods=['POST'])
+def fan_add():
+    req_data = request.get_json()
+    timer = req_data['time']
+    timer = int(timer)
+
+    #check state, won't add time if its not running
+    if erv.checkpinstatus() == 0:
+        return jsonify({'state': 'not started'})
+    else:
+        executor.submit(add_time_to_fan, timer)
+        return jsonify({'state': 'time added', 'time': timer})
+
+
+@app.route('/fan/stop', methods=['POST'])
+def fan_stop():
+    executor.submit(stop_fan)
+    state = erv.checkpinstatus()
+    return jsonify({'state': state})
+
+
+@app.route('/health')
+def health_state():
+    return jsonify({'health': 'up'})
+"""
+# submitting data not query string
+@app.route('/form', methods=['POST', 'GET'])
+def form():
+    req_data = request.get_json()
+    timer = req_data['time']
+    executor.submit(custom_task, timer)
+    return jsonify({'duration': timer})
+
+
+@app.route('/jobs')
+def run_jobs():
+    return jsonify({'key': 'value'})
+
+
+@app.route('/custom/<int:duration>')
+def run_custom(duration):
+    executor.submit(custom_task, duration)
+    return jsonify({'duration': duration})
+
+
+def custom_task(timer):
+    print('sleeping for {} seconds'.format(timer))
+    sleep(int(timer))
+    print('done!')
+"""
+
+def add_time_to_fan(timer):
+    timer *= 60
+    erv.add_time(timer)
+
+
+def start_fan(timer):
+    print('starting fan function')
+    # erv.relay(timer)
+    # if its running already don't let it run again
+    # if you want it to queue up additional, change executor to 1
+    timer *= 60
+    erv.relay(timer)
+    print('stopping fan function')
+
+
+def stop_fan():
+    erv.relay_close()
+
+
+if __name__ == '__main__':
+    erv.pincleanup()
+    app.run(debug=True, host='0.0.0.0')
