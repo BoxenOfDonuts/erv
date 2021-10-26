@@ -101,7 +101,8 @@ def start_fan(timer):
 
 
 def stop_fan():
-    erv.relay_close()
+    erv.stop_fan()
+    #erv.relay_close()
 
 
 if __name__ == '__main__':

@@ -126,6 +126,12 @@ def add_time(timer):
     logger.info("Added {} seconds".format(timer))
     t.add(timer)
 
+def stop_fan():
+    logger.info("Stopping fan early")
+    relay_close()
+    logger.info("Canceling timer")
+    t.cancel()
+
 
 if __name__=="__main__":
     try:
