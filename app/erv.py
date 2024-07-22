@@ -6,6 +6,14 @@ import sys
 from pythonjsonlogger import jsonlogger
 from threading import Thread, Event
 
+# imports for sht31d board
+import board
+import busio
+import adafruit_sht31d
+i2c = busio.I2C(board.SCL, board.SDA)
+sensor = adafruit_sht31d.SHT31D(i2c)
+
+
 # Setup Logging
 logHandler = logging.FileHandler(filename="/var/log/erv/erv.log")
 formatter = jsonlogger.JsonFormatter('%(asctime)s %(message)s')
@@ -70,6 +78,14 @@ def listen():
         connection.close()
         relay()
 
+
+def getTemperature():
+    degrees = sensor.temperature
+    return degrees
+
+def getHumidity():
+    humidity = sensor.relative_humidity
+    return humidity
 
 def checkpinstatus():
     logger.info("Checking pin state")

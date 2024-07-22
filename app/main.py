@@ -58,6 +58,21 @@ def fan_stop():
 @app.route('/health')
 def health_state():
     return jsonify({'health': 'up'})
+
+@app.route('/climate')
+def climate():
+    humidity = erv.getHumidity()
+    temperature = erv.getTemperature()
+    return jsonify({'temperature': temperature, 'humidity': humidity})
+
+@app.route('/climate/temperature')
+def temperateur():
+    return jsonify({'temperature': erv.getTemperature()})
+
+@app.route('/climate/humidity')
+def humidity():
+    return jsonify({'humidity': erv.getHumidity()})
+
 """
 # submitting data not query string
 @app.route('/form', methods=['POST', 'GET'])
