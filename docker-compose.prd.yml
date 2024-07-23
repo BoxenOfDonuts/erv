@@ -1,8 +1,7 @@
-
 version: '3'
 services:
   app:
-    platform: linux/arm/v6
+    platform: linux/arm/v5
     command: uwsgi --http 0.0.0.0:5000 --master -p  4 -w wsgi:app
     build:
       context: ./app
@@ -10,9 +9,9 @@ services:
       - 5000
     volumes:
      - /var/log/erv/:/var/log/erv/
-    #devices:
-    # - "/dev/gpiomem"
-    # - "/dev/i2c-1"
+    devices:
+     - "/dev/gpiomem"
+     - "/dev/i2c-1"
     restart: "unless-stopped"
   nginx:
     build: ./server
@@ -22,4 +21,4 @@ services:
       - NGINX_ENTRYPOINT_QUIET_LOGS=1
     depends_on:
       - app
-    #restart: "unless-stopped"
+    restart: "unless-stopped"
