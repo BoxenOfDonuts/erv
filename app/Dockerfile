@@ -14,7 +14,7 @@ COPY requirements.txt ./
 #COPY server/wsgi.ini /etc/uwsgi/
 #COPY server/supervisord.conf /etc/
 
-COPY /app .
+COPY / .
 
 RUN apt-get update
 RUN apt-get install -y cmake
@@ -27,4 +27,4 @@ RUN pip install uwsgi
 RUN export PYTHONPATH=/project
 
 #CMD ["/usr/bin/supervisord"]
-CMD ["uwsgi", "--http", "0.0.0.0:5000", "--master", "-p", "4", "-w", "wsgi:app"]
+#CMD ["uwsgi", "--http", "0.0.0.0:5000", "--master", "-p", "4", "-w", "wsgi:app"]
