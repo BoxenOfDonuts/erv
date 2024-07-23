@@ -1,6 +1,7 @@
 version: '3'
 services:
   app:
+    platform: linux/arm/v6
     build: .
     ports:
      - "80:80"
