@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from time import sleep
+from log import configure_logging
 import erv
 from concurrent.futures import ThreadPoolExecutor
 
@@ -13,6 +14,7 @@ minutes twice it will go for 20, no matter when you ask for the second 20
 executor = ThreadPoolExecutor(1)
 
 app = Flask(__name__)
+logger = configure_logging(app)
 
 @app.route('/state')
 def check_state():
