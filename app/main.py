@@ -14,7 +14,6 @@ executor = ThreadPoolExecutor(1)
 
 app = Flask(__name__)
 
-
 @app.route('/state')
 def check_state():
     state = erv.checkpinstatus()
