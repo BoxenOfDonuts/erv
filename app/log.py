@@ -1,6 +1,7 @@
 import logging
 import sys
 from pythonjsonlogger import jsonlogger
+logger = logging.getLogger()
 
 def configure_logging(app):
     if app.debug:
@@ -13,5 +14,3 @@ def configure_logging(app):
         logging.getLogger().addHandler(logHandler)
 
     logging.getLogger().setLevel(logging.INFO)
-    logger = logging.getLogger()
-    return logger
