@@ -1,11 +1,9 @@
 import socket
 import time
-import logging
 import RPi.GPIO as G
 import sys
-from logging import StreamHandler
-from pythonjsonlogger import jsonlogger
 from threading import Thread, Event
+from log import logger
 
 # imports for sht31d board
 import board
@@ -13,20 +11,6 @@ import busio
 import adafruit_sht31d
 i2c = busio.I2C(board.SCL, board.SDA)
 sensor = adafruit_sht31d.SHT31D(i2c)
-
-
-# Setup Logging
-logHandler = logging.FileHandler(filename="/var/log/erv/erv.log")
-consoleHandler = StreamHandler(sys.stdout)
-
-formatter = jsonlogger.JsonFormatter('%(asctime)s %(message)s')
-logHandler.setFormatter(formatter)
-#consoleHandler.setFormatter(formatter)
-
-logging.getLogger().addHandler(logHandler)
-logging.getLogger().addHandler(consoleHandler)
-logging.getLogger().setLevel(logging.INFO)
-logger = logging.getLogger()
 
 
 def Timer(*args, **kwargs):
