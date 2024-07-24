@@ -12,8 +12,4 @@ RUN pip install --upgrade pip && \
 
 COPY / .
 
-#ENV PYTHONPATH /project
 RUN export PYTHONPATH=/project
-
-#CMD ["/usr/bin/supervisord"]
-#CMD ["uwsgi", "--http", "0.0.0.0:5000", "--master", "-p", "4", "-w", "wsgi:app"]
