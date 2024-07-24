@@ -55,21 +55,21 @@ def fan_stop():
     return jsonify({'state': state})
 
 
-@app.route('/health')
+@app.route('/health', methods=['GET'])
 def health_state():
     return jsonify({'health': 'up'})
 
-@app.route('/climate')
+@app.route('/climate', methods=['GET'])
 def climate():
     humidity = erv.getHumidity()
     temperature = erv.getTemperature()
     return jsonify({'temperature': temperature, 'humidity': humidity})
 
-@app.route('/climate/temperature')
+@app.route('/climate/temperature', methods=['GET'])
 def temperateur():
     return jsonify({'temperature': erv.getTemperature()})
 
-@app.route('/climate/humidity')
+@app.route('/climate/humidity', methods=['GET'])
 def humidity():
     return jsonify({'humidity': erv.getHumidity()})
 
