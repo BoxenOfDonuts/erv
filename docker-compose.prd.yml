@@ -3,8 +3,7 @@ services:
   app:
     platform: linux/arm/v5
     command: uwsgi --http 0.0.0.0:5000 --master -p  4 -w wsgi:app
-    build:
-      context: ./app
+    image: boxenofdonuts/erv-api:0.2.0
     expose:
       - 5000
     volumes:
@@ -14,12 +13,9 @@ services:
      - "/dev/i2c-1"
     restart: "unless-stopped"
   nginx:
-    build: ./server
+    image: nginx:stable-alpine
     volumes:
-     - /var/log/erv/:/var/log/erv/
-    devices:
-     - "/dev/gpiomem"
-     - "/dev/i2c-1"
+     - ./nginx/:/etc/nginx/conf.d/
     ports:
       - 80:80
     environment:
