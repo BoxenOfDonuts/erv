@@ -27,4 +27,4 @@ RPi.GPIO==0.7.1
 sysv-ipc==1.1.0
 typing-extensions==4.12.2
 urllib3==1.25.11
-Werkzeug==0.16.0
+Werkzeug==3.0.3
