@@ -7,7 +7,7 @@ adafruit-circuitpython-typing==1.10.3
 Adafruit-PlatformDetect==3.72.1
 Adafruit-PureIO==1.1.11
 binho-host-adapter==0.1.6
-certifi==2019.6.16
+certifi==2024.7.4
 chardet==3.0.4
 charset-normalizer==3.2.0
 Click==7.0
