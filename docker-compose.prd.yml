@@ -15,8 +15,13 @@ services:
     restart: "unless-stopped"
   nginx:
     build: ./server
+    volumes:
+     - /var/log/erv/:/var/log/erv/
+    devices:
+     - "/dev/gpiomem"
+     - "/dev/i2c-1"
     ports:
-      - 8080:80
+      - 80:80
     environment:
       - NGINX_ENTRYPOINT_QUIET_LOGS=1
     depends_on:
