@@ -12,4 +12,7 @@ RUN pip install --upgrade pip && \
 
 COPY / .
 
+# RUN groupadd -g 998 i2c && \
+#     usermod -a -G i2c www-data
+
 RUN export PYTHONPATH=/project
