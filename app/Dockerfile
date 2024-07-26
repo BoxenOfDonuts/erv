@@ -1,9 +1,9 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 WORKDIR /project
 
-RUN apt-get update -y && \
-    apt-get install --no-install-recommends cmake -y
+RUN apt update && \
+    apt install -y gcc
 
 COPY requirements.txt ./
 RUN pip install --upgrade pip && \
