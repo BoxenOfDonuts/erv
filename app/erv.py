@@ -4,6 +4,7 @@ import RPi.GPIO as G
 import sys
 from threading import Thread, Event
 from log import logger
+import functools
 
 # imports for sht31d board
 import board
@@ -12,6 +13,24 @@ import adafruit_sht31d
 i2c = busio.I2C(board.SCL, board.SDA)
 sensor = adafruit_sht31d.SHT31D(i2c)
 
+
+def cache(fn=None, time_to_live=60):  # 1 minute
+    if fn is None:
+        return functools.partial(cache, time_to_live=time_to_live)
+    
+    my_cache = {}
+    
+    @functools.wraps(fn)
+    def _inner_fn(*args, **kwargs):
+        key = (args, frozenset(kwargs.items()))
+        if key not in my_cache or time.time() > my_cache[key]['expires']:
+            my_cache[key] = {
+                "value": fn(*args, **kwargs),
+                "expires": time.time() + time_to_live
+            }
+        return my_cache[key]['value']
+    
+    return _inner_fn
 
 def Timer(*args, **kwargs):
     return _Timer(*args, **kwargs)
@@ -68,11 +87,11 @@ def listen():
         connection.close()
         relay()
 
-
+@cache
 def getTemperature():
     degrees = sensor.temperature
     return degrees
-
+@cache
 def getHumidity():
     humidity = sensor.relative_humidity
     return humidity

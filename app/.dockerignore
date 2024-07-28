@@ -1,0 +1,37 @@
+# Ignore node_modules and other dependencies
+node_modules
+venv
+__pycache__
+
+# Ignore Python cache files
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# Ignore logs and temp files
+*.log
+*.tmp
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore Docker-related files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Ignore IDE/editor specific files
+.vscode
+.idea
+*.swp
+
+# Ignore build output
+dist
+build
+*.egg-info
