@@ -23,5 +23,5 @@ RPi.GPIO==0.7.1
 sysv-ipc==1.1.0
 typing-extensions==4.12.2
 uWSGI==2.0.26
-werkzeug==3.0.3
+werkzeug==3.0.6
 zipp==3.19.2
