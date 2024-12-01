@@ -41,9 +41,11 @@ def fan_add():
     timer = req_data['time']
     timer = int(timer)
 
-    #check state, won't add time if its not running
+    #check state, start with that time
     if erv.checkpinstatus() == 0:
-        return jsonify({'state': 'not started'})
+        executor.submit(start_fan, timer)
+        return jsonify({'state': 'time added', 'time': timer})
+
     else:
         executor.submit(add_time_to_fan, timer)
         return jsonify({'state': 'time added', 'time': timer})
