@@ -1,9 +1,8 @@
-FROM python:3.9
+FROM python:3.11-alpine
 
 WORKDIR /project
 
-RUN apt-get update -y && \
-    apt-get install --no-install-recommends cmake -y
+RUN apk add --no-cache build-base libffi-dev
 
 COPY requirements.txt ./
 RUN pip install --upgrade pip && \
