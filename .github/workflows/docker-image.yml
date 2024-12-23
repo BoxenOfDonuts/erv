@@ -29,6 +29,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./app
-          platforms: linux/arm/v5
+          platforms: linux/arm/v6
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/erv-api:latest

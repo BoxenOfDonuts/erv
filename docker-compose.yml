@@ -1,6 +1,6 @@
 services:
   app:
-    platform: linux/arm/v5
+    platform: linux/arm/v6
     command: uwsgi --http 0.0.0.0:5000 --master -p 1 -T -w wsgi:app
     image: boxenofdonuts/erv-api:latest
     expose:
