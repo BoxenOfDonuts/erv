@@ -25,10 +25,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Build and push
+        name: Build and push API
         uses: docker/build-push-action@v6
         with:
           context: ./app
-          platforms: linux/arm/v6
+          platforms: linux/arm/v6,linux/arm64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/erv-api:latest
+      -
+        name: Build and push Climate
+        uses: docker/build-push-action@v6
+        with:
+          context: ./climate
+          platforms: linux/arm/v6,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/erv-climate:latest

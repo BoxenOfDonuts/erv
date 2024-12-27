@@ -1,12 +1,15 @@
 services:
   app:
-    platform: linux/arm/v6
-    command: uwsgi --http 0.0.0.0:5000 --master -p 1 -T -w wsgi:app
+    privileged: true # meeded for gpiozero to detect gpio libs correctly
+    command: uwsgi --ini /etc/wsgi/wsgi.ini
     image: boxenofdonuts/erv-api:latest
+    build:
+      context: ./app
     expose:
       - 5000
     volumes:
      - /var/log/erv/:/var/log/erv/
+     - ./wsgi/:/etc/wsgi/
     devices:
      - "/dev/gpiomem"
      - "/dev/i2c-1"
@@ -22,3 +25,5 @@ services:
     depends_on:
       - app
     restart: "unless-stopped"
+include:
+  - ./climate/climate.yml

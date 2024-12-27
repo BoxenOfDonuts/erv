@@ -1,17 +1,9 @@
-import socket
-import time
-import RPi.GPIO as G
-import sys
 from threading import Thread, Event
 from log import logger
+from gpiozero import OutputDevice
 
-# imports for sht31d board
-import board
-import busio
-import adafruit_sht31d
-i2c = busio.I2C(board.SCL, board.SDA)
-sensor = adafruit_sht31d.SHT31D(i2c)
-
+# Initialize GPIO pin
+pin = OutputDevice(4)
 
 def Timer(*args, **kwargs):
     return _Timer(*args, **kwargs)
@@ -41,7 +33,7 @@ class _Timer(Thread):
     def run(self):
         self.finished.wait(self.interval)
         if self.additional_interval:
-            logger.info('added {} minutes to running fan'.format(self.additional_interval))
+            logger.info('added {} minutes to running fan'.format(self.additional_interval / 60))
             self.finished.wait(self.additional_interval)
             self.additional_interval = None
         if not self.finished.is_set():
@@ -53,72 +45,17 @@ class _Timer(Thread):
         self.additional_interval = interval
 
 
-def listen():
-    logger.info("Starting Bind")
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(("0.0.0.0", 1443))
-    serversocket.listen(5)
-
-    while True:
-        # waiting for connection
-        logger.info("Waiting for connection")
-        connection, addr = serversocket.accept()
-        address = addr[0]
-        logger.info("Connection from address {}".format(address))
-        connection.close()
-        relay()
-
-
-def getTemperature():
-    degrees = sensor.temperature
-    return degrees
-
-def getHumidity():
-    humidity = sensor.relative_humidity
-    return humidity
-
 def checkpinstatus():
     logger.info("Checking pin state")
-    G.setmode(G.BCM)
-    G.setup(4, G.OUT)
-
     # retuns 0 for low and 1 for high
-    state = G.input(4)
+    state = pin.value
     return state
 
 
 def pincleanup():
-    G.setmode(G.BCM)
-    G.setup(4, G.OUT, initial=0)
-    G.cleanup()
+    pin.off()
+    pin.close()
     logger.info('cleanup ran')
-
-
-def relay_open(timer):
-    #set mode
-    G.setmode(G.BCM)
-
-    #setup relay pin
-    G.setup(4, G.OUT, initial=0)
-
-    # setup low to flip to NO
-    G.output(4, G.HIGH)
-    logger.info("Relay switched to NO", extra={'PIN_4': G.input(4)})
-
-    logger.info("Relay opened for {} seconds".format(timer))
-
-
-def relay_close():
-    logger.info("Close function starting")
-    G.setmode(G.BCM)
-    # is that what is needed?
-    G.setup(4, G.OUT)
-    # close relay
-    G.output(4, G.LOW)
-    logger.info("Switched off Relay")
-
-    # be a good scout and cleanup after yourself
-    G.cleanup()
 
 
 def relay(timer):
@@ -128,22 +65,23 @@ def relay(timer):
     t.start()
 
 
+def relay_open(timer):
+    pin.on()
+    logger.info("Relay switched to NO", extra={'PIN_4': pin.value})
+    logger.info("Relay opened for {} minutes".format(timer / 60))
+
+
+def relay_close():
+    logger.info("Close function starting")
+    pin.off()
+    logger.info("Switched off Relay")
+
+
 def add_time(timer):
-    logger.info("Added {} seconds".format(timer))
+    logger.info("Added {} minutes".format(timer / 60))
     t.add(timer)
 
+
 def stop_fan():
-    logger.info("Stopping fan early")
-    relay_close()
-    logger.info("Canceling timer")
-    t.cancel()
-
-
-if __name__=="__main__":
-    try:
-        pincleanup()
-        listen()
-    except KeyboardInterrupt:
-        G.cleanup()
-        logger.info('Keyboard interrupt, exiting')
-        sys.exit()
+    logger.info("Stopping fan")
+    pin.off()

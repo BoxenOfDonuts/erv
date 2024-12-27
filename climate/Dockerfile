@@ -12,13 +12,11 @@ FROM python:3.11-alpine3.21
 
 WORKDIR /app
 
-ENV GPIOZERO_PIN_FACTORY=rpigpio
-
 COPY --from=builder /app/wheels /wheels
 COPY --from=builder /app/requirements.txt .
 
 RUN pip install --no-cache /wheels/*
 
-COPY / .
+COPY main.py .
 
-RUN export PYTHONPATH=/app
+CMD ["python", "main.py"]

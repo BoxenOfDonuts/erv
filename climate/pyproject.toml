@@ -1,0 +1,13 @@
+[project]
+name = "templogger"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "adafruit-blinka>=8.50.0",
+    "adafruit-circuitpython-sht31d>=2.3.25",
+    "datadog>=0.50.2",
+    "requests>=2.32.3",
+    "rpi-gpio>=0.7.1",
+]

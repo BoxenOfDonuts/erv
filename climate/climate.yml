@@ -1,0 +1,29 @@
+services:
+  climate:
+    image: boxenofdonuts/erv-climate:latest
+    build: .
+    devices:
+     - "/dev/gpiomem"
+     - "/dev/i2c-1"
+    privileged: true # needed for blinka to work, or by setting the forceboard env variables
+    environment:
+      #- BLINKA_FORCEBOARD=RASPBERRY_PI_ZERO_2_W
+      #- BLINKA_FORCECHIP=BCM2XXX
+      - DATADOG_API_KEY=${DATADOG_API_KEY}
+      - DATADOG_APP_KEY=${DATADOG_APP_KEY}
+      - DENO_ENABLED=${DENO_ENABLED}
+      - ROOM=${ROOM}
+      - CLIMATE_API_USER=${CLIMATE_API_USER}
+      - CLIMATE_API_PW=${CLIMATE_API_PW}
+      - HUMIDITY_OFFSET=${HUMIDITY_OFFSET:-0}
+    develop:
+      watch:
+        - action: rebuild # initial build is cached so may be necessary to switch to this
+          path: .
+          target: /app
+    restart: "unless-stopped"
+
+
+# .env file for development?
+# RESTART_POLICY=no
+# restart: "${RESTART_POLICY:-unless-stopped}"

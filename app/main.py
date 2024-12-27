@@ -62,47 +62,6 @@ def fan_stop():
 def health_state():
     return jsonify({'health': 'up'})
 
-@app.route('/climate', methods=['GET'])
-def climate():
-    humidity = erv.getHumidity()
-    temperature = erv.getTemperature()
-    return jsonify({'temperature': temperature, 'humidity': humidity})
-
-@app.route('/climate/temperature', methods=['GET'])
-def temperateur():
-    return jsonify({'temperature': erv.getTemperature()})
-
-@app.route('/climate/humidity', methods=['GET'])
-def humidity():
-    return jsonify({'humidity': erv.getHumidity()})
-
-"""
-# submitting data not query string
-@app.route('/form', methods=['POST', 'GET'])
-def form():
-    req_data = request.get_json()
-    timer = req_data['time']
-    executor.submit(custom_task, timer)
-    return jsonify({'duration': timer})
-
-
-@app.route('/jobs')
-def run_jobs():
-    return jsonify({'key': 'value'})
-
-
-@app.route('/custom/<int:duration>')
-def run_custom(duration):
-    executor.submit(custom_task, duration)
-    return jsonify({'duration': duration})
-
-
-def custom_task(timer):
-    print('sleeping for {} seconds'.format(timer))
-    sleep(int(timer))
-    print('done!')
-"""
-
 def add_time_to_fan(timer):
     timer *= 60
     erv.add_time(timer)
@@ -110,17 +69,11 @@ def add_time_to_fan(timer):
 
 def start_fan(timer):
     print('starting fan function')
-    # erv.relay(timer)
-    # if its running already don't let it run again
-    # if you want it to queue up additional, change executor to 1
     timer *= 60
     erv.relay(timer)
-    print('stopping fan function')
-
 
 def stop_fan():
     erv.stop_fan()
-    #erv.relay_close()
 
 
 if __name__ == '__main__':
