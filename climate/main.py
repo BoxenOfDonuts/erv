@@ -22,6 +22,7 @@ class ClimateMonitor:
         self.current_room = os.getenv('ROOM')
         self.user = os.getenv('CLIMATE_API_USER')
         self.password = os.getenv('CLIMATE_API_PW')
+        self.climate_url = os.getenv('CLIMATE_API_URL')
         self.humidity_offset = float(os.getenv('HUMIDITY_OFFSET', 0))
         self.loops = 0
 
@@ -32,7 +33,7 @@ class ClimateMonitor:
         if not self.api_key or not self.app_key or not self.current_room:
             logging.error("Missing essential environment variables")
             exit(1)
-        if self.deno_enabled and (not self.user or not self.password):
+        if self.deno_enabled and (not self.user or not self.password or not self.climate_url):
             logging.error("Missing Deno environment variables")
             exit(1)
 
@@ -59,7 +60,7 @@ class ClimateMonitor:
         auth = (self.user, self.password)
 
         try:
-            r = requests.put(f'http://192.168.0.111:8000/rooms/{self.current_room}/climate', auth=auth, json=payload, timeout=15)
+            r = requests.put(f'http://{self.climate_url}/rooms/{self.current_room}/climate', auth=auth, json=payload, timeout=15)
             r.raise_for_status()
         except requests.RequestException as err:
             logging.error(f"Unexpected error: {err}")

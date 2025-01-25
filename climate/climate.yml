@@ -15,6 +15,7 @@ services:
       - ROOM=${ROOM}
       - CLIMATE_API_USER=${CLIMATE_API_USER}
       - CLIMATE_API_PW=${CLIMATE_API_PW}
+      - CLIMATE_API_URL=${CLIMATE_API_URL}
       - HUMIDITY_OFFSET=${HUMIDITY_OFFSET:-0}
     develop:
       watch:
