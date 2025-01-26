@@ -22,3 +22,5 @@ RUN pip install --no-cache /wheels/*
 COPY / .
 
 RUN export PYTHONPATH=/app
+HEALTHCHECK --start-period=1m --interval=5m --timeout=15s \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:5000/status > /dev/null || exit 1

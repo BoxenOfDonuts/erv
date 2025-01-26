@@ -16,7 +16,7 @@ executor = ThreadPoolExecutor(1)
 app = Flask(__name__)
 configure_logging(app)
 
-@app.route('/state')
+@app.route('/state', methods=['GET'])
 def check_state():
     state = erv.checkpinstatus()
     return jsonify({'pin state': state})
@@ -58,7 +58,7 @@ def fan_stop():
     return jsonify({'state': state})
 
 
-@app.route('/health', methods=['GET'])
+@app.route('/status', methods=['GET'])
 def health_state():
     return jsonify({'health': 'up'})
 
