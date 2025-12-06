@@ -45,7 +45,7 @@ pyserial==3.5
     #   pyftdi
 pyusb==1.2.1
     # via pyftdi
-requests==2.32.3
+requests==2.32.4
     # via
     #   templogger (pyproject.toml)
     #   datadog
