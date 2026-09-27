@@ -12,15 +12,23 @@ FROM python:3.11-alpine3.21
 
 WORKDIR /app
 
-ENV GPIOZERO_PIN_FACTORY=rpigpio
+RUN apk add --no-cache libffi
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    GPIOZERO_PIN_FACTORY=rpigpio
 
 COPY --from=builder /app/wheels /wheels
 COPY --from=builder /app/requirements.txt .
 
-RUN pip install --no-cache /wheels/*
+RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
-COPY / .
+COPY . .
 
-RUN export PYTHONPATH=/app
-HEALTHCHECK --start-period=1m --interval=5m --timeout=15s \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:5000/status > /dev/null || exit 1
+EXPOSE 5000
+
+HEALTHCHECK --start-period=30s --interval=30s --timeout=5s --retries=3 \
+  CMD wget -q --spider http://127.0.0.1:5000/status || exit 1
+
+CMD ["uwsgi", "--ini", "/etc/wsgi/wsgi.ini"]

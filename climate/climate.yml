@@ -22,7 +22,7 @@ services:
         - action: rebuild # initial build is cached so may be necessary to switch to this
           path: .
           target: /app
-    restart: "on-failure:3"
+    restart: "unless-stopped"
 
 
 # .env file for development?
