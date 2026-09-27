@@ -12,10 +12,15 @@ FROM python:3.11-alpine3.21
 
 WORKDIR /app
 
+RUN apk add --no-cache libffi
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
 COPY --from=builder /app/wheels /wheels
 COPY --from=builder /app/requirements.txt .
 
-RUN pip install --no-cache /wheels/*
+RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
 COPY main.py .
 

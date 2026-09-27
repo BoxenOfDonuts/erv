@@ -4,9 +4,15 @@ import adafruit_sht31d
 import datetime
 import time
 import os
+import sys
+import signal
 from datadog import initialize, api
+from urllib3.util import Retry
 import requests
 import logging
+
+# Handle SIGTERM gracefully when running as PID 1 in Docker
+signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
@@ -26,34 +32,54 @@ class ClimateMonitor:
         self.humidity_offset = float(os.getenv('HUMIDITY_OFFSET', 0))
         self.loops = 0
 
+        # Retry configuration
+        self.max_retries = int(os.getenv('DD_MAX_RETRIES', 3))
+        self.retry_backoff = float(os.getenv('DD_RETRY_BACKOFF', 2.0))
+
         self._validate_env_variables()
         self._initialize_datadog()
 
     def _validate_env_variables(self):
         if not self.api_key or not self.app_key or not self.current_room:
             logging.error("Missing essential environment variables")
-            exit(1)
+            sys.exit(1)
         if self.deno_enabled and (not self.user or not self.password or not self.climate_url):
             logging.error("Missing Deno environment variables")
-            exit(1)
+            sys.exit(1)
 
     def _initialize_datadog(self):
         try:
-            options = {'api_key': self.api_key, 'app_key': self.app_key}
+            retry_strategy = Retry(
+                total=self.max_retries,
+                backoff_factor=self.retry_backoff,
+                status_forcelist=[429, 500, 502, 503, 504],
+                raise_on_status=False
+            )
+            options = {
+                'api_key': self.api_key,
+                'app_key': self.app_key,
+                'max_retries': retry_strategy
+            }
             initialize(**options)
         except Exception as e:
             logging.error(f"Error initializing Datadog API: {e}")
-            exit(1)
+            sys.exit(1)
 
     @staticmethod
     def c2f(temp):
         return (1.8 * temp) + 32
 
     def send_to_dd(self, temp, humidity):
-        api.Metric.send([
+        response = api.Metric.send([
             {'metric': 'current.temp', 'points': temp, 'tags': [f'room:{self.current_room}']},
             {'metric': 'current.humidity', 'points': humidity, 'tags': [f'room:{self.current_room}']}
         ])
+
+        if response and isinstance(response, dict) and 'errors' in response:
+            logging.critical(
+                f"Datadog metric send failed after retries: {response['errors']}. Exiting to trigger container restart."
+            )
+            sys.exit(1)
 
     def send_to_deno(self, temp, humidity, update_date):
         payload = {'temperature': temp, 'humidity': humidity, 'lastUpdateDate': update_date}
